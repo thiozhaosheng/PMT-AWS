@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard - Patch Management Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f9fafb;
+      }
+      #recentPatches {
+        max-height: 288px;
+        overflow-y: auto;
+      }
+      #recentPatches::-webkit-scrollbar {
+        width: 6px;
+      }
+      #recentPatches::-webkit-scrollbar-thumb {
+        background-color: #a78bfa;
+        border-radius: 3px;
+      }
+      #recentPatches li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      #recentPatches li:last-child {
+        border-bottom: none;
+      }
+      #recentPatches .patch-info {
+        flex: 1 1 50%;
+        overflow: hidden;
+      }
+      #recentPatches .patch-info span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      #recentPatches .system-name {
+        font-weight: 600;
+        color: #111827;
+      }
+      #recentPatches .patch-name {
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+      #recentPatches .patch-date {
+        flex: 0 0 150px;
+        color: #4b5563;
+        text-align: left;
+        margin-left: 1rem;
+        white-space: nowrap;
+      }
+      #recentPatches .patch-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: #fff;
+        text-align: center;
+        min-width: 60px;
+        margin-left: 1rem;
+        white-space: nowrap;
+      }
+      .bg-green-500 {
+        background-color: #22c55e;
+      }
+      .bg-yellow-400 {
+        background-color: #facc15;
+      }
+      .bg-red-500 {
+        background-color: #ef4444;
+      }
+    </style>
+  </head>
+  <body class="flex h-screen overflow-hidden">
+    <aside
+      id="sidebar"
+      class="bg-white w-64 border-r border-gray-200 hidden md:flex flex-col"
+    >
+      <div class="p-6">
+        <h1 class="text-2xl font-bold text-indigo-600">PatchMgmt</h1>
+      </div>
+      <nav class="flex-1 px-4 space-y-2">
+        <a
+          href="dashboard.html"
+          class="block px-4 py-2 rounded text-indigo-700 bg-indigo-100 font-semibold"
+          >Dashboard</a
+        >
+        <a href="clients.html" class="block px-4 py-2 rounded hover:bg-gray-100"
+          >Clients</a
+        >
+        <a href="systems.html" class="block px-4 py-2 rounded hover:bg-gray-100"
+          >Systems</a
+        >
+        <a href="patches.html" class="block px-4 py-2 rounded hover:bg-gray-100"
+          >Patches</a
+        >
+        <a
+          href="users.html"
+          id="usersLink"
+          class="block px-4 py-2 rounded hover:bg-gray-100"
+          >Users</a
+        >
+        <a href="reports.html" class="block px-4 py-2 rounded hover:bg-gray-100"
+          >Reports</a
+        >
+      </nav>
+    </aside>
+
+    <div class="flex-1 flex flex-col">
+      <header
+        class="bg-white shadow px-6 py-4 flex justify-between items-center"
+      >
+        <button
+          id="sidebarToggle"
+          class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+        <div class="flex items-center space-x-4 ml-auto">
+          <span id="usernameDisplay" class="text-gray-700 font-semibold"></span>
+          <button
+            id="logoutBtn"
+            class="text-red-600 hover:text-red-800 font-semibold"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-y-auto p-6 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold mb-6 text-gray-900">
+          Welcome, <span id="usernameWelcome"></span>
+        </h2>
+
+        <section
+          class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-6"
+        >
+          <div
+            class="bg-white rounded-lg shadow p-6 flex flex-col justify-center"
+          >
+            <h3 class="text-xl font-semibold mb-4">Total Clients</h3>
+            <p id="totalClients" class="text-3xl font-bold text-indigo-600">
+              0
+            </p>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 flex flex-col justify-center"
+          >
+            <h3 class="text-xl font-semibold mb-4">Total Systems</h3>
+            <p id="totalSystems" class="text-3xl font-bold text-indigo-600">
+              0
+            </p>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 flex flex-col justify-center"
+          >
+            <h3 class="text-xl font-semibold mb-4">Patches Applied</h3>
+            <p id="patchesApplied" class="text-3xl font-bold text-indigo-600">
+              0
+            </p>
+          </div>
+        </section>
+
+        <section
+          class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-6"
+        >
+          <div
+            class="bg-white rounded-lg shadow p-6 flex flex-col"
+            style="height: 350px"
+          >
+            <h3 class="text-xl font-semibold mb-4">Patch Status Overview</h3>
+            <div style="flex-grow: 1; position: relative">
+              <canvas
+                id="patchStatusChart"
+                style="width: 100%; height: 100%"
+              ></canvas>
+            </div>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow p-6 flex flex-col col-span-2"
+            style="height: 350px"
+          >
+            <h3 class="text-xl font-semibold mb-4">Patch History Over Time</h3>
+            <div style="flex-grow: 1; position: relative">
+              <canvas
+                id="patchHistoryChart"
+                style="width: 100%; height: 100%"
+              ></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto overflow-y-auto max-h-96"
+        >
+          <h3 class="text-xl font-semibold mb-4">Recent Patch Activity</h3>
+          <ul id="recentPatches"></ul>
+        </section>
+      </main>
+    </div>
+
+    <script src="dashboard-script.js"></script>
+  </body>
+</html>

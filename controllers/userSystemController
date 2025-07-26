@@ -1,0 +1,42 @@
+const userSystemModel = require("../models/userSystemModel");
+
+async function assignSystemToUser(req, res) {
+  try {
+    const { user_id, system_id } = req.body;
+    const result = await userSystemModel.assignSystemToUser(user_id, system_id);
+    res.status(201).json({ message: "Mapping created", result });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function getSystemsForCurrentUser(req, res) {
+  try {
+    const { user_id, role } = req.user;
+
+    if (role === "admin") {
+      const systems = await userSystemModel.getAllSystems();
+      return res.json(systems);
+    }
+
+    const systems = await userSystemModel.getSystemsByUserId(user_id);
+    res.json(systems);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+async function getAllMappings(req, res) {
+  try {
+    const result = await userSystemModel.getUserSystemMappings();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+module.exports = {
+  assignSystemToUser,
+  getSystemsForCurrentUser,
+  getAllMappings,
+};
