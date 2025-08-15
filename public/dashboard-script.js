@@ -46,7 +46,10 @@ async function fetchDashboardData() {
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
 
-  const countsRes = await fetch("/api/dashboard/counts", { headers });
+  const countsRes = await fetch("/api/dashboard/counts", {
+    headers,
+    credentials: "include",
+  });
   if (countsRes.ok) {
     const counts = await countsRes.json();
     document.getElementById("totalClients").textContent = counts.totalClients;
@@ -57,6 +60,7 @@ async function fetchDashboardData() {
 
   const patchStatusRes = await fetch("/api/dashboard/patch-status", {
     headers,
+    credentials: "include",
   });
   if (patchStatusRes.ok) {
     const patchStatus = await patchStatusRes.json();
@@ -70,6 +74,7 @@ async function fetchDashboardData() {
 
   const patchHistoryRes = await fetch("/api/dashboard/patch-history", {
     headers,
+    credentials: "include",
   });
   if (patchHistoryRes.ok) {
     const patchHistory = await patchHistoryRes.json();
@@ -80,6 +85,7 @@ async function fetchDashboardData() {
 
   const recentPatchesRes = await fetch("/api/dashboard/recent-patches", {
     headers,
+    credentials: "include",
   });
   if (recentPatchesRes.ok) {
     const recentPatches = await recentPatchesRes.json();
